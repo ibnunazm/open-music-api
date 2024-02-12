@@ -5,27 +5,10 @@ class AlbumsHandler {
     this._service = service;
     this._validator = validator;
 
-    this.getAllAlbumsHandler = this.getAlbumsHandler.bind(this);
     this.addAlbumHandler = this.addAlbumHandler.bind(this);
     this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
     this.updateAlbumByIdHandler = this.updateAlbumByIdHandler.bind(this);
     this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
-  }
-
-  async getAlbumsHandler(req, h) {
-    await this._validator.validateQuerySearchAlbum(req.query);
-
-    const { name = "" } = req.query;
-    const data = await this._service.getAlbumsByQuery(name);
-    const response = h.response({
-      status: "success",
-      data: {
-        albums: data,
-      },
-    });
-
-    response.code(200);
-    return response;
   }
 
   async addAlbumHandler(req, h) {

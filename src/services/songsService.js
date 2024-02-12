@@ -11,10 +11,7 @@ class SongsService {
   async addSong({ title, year, genre, performer, duration, albumId }) {
     const id = nanoid(16);
     const query = {
-      text: `INSERT INTO 
-      songs (id, title, year,  performer, genre, duration, "albumId") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
-      RETURNING id`,
+      text: 'INSERT INTO songs (id, title, year,  performer, genre, duration, "albumId") VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       values: [id, title, year, performer, genre, duration, albumId],
     };
 
@@ -27,8 +24,7 @@ class SongsService {
   }
   async getSongsByQuery(parameterValue) {
     const query = {
-      text: `SELECT * FROM songs 
-      WHERE 1=1 AND title ILIKE $1 AND performer ILIKE $2`,
+      text: "SELECT * FROM songs WHERE 1=1 AND title ILIKE $1 AND performer ILIKE $2",
       values: [`%${parameterValue.title}%`, `%${parameterValue.performer}%`],
     };
 
@@ -56,9 +52,7 @@ class SongsService {
     { title, year, genre, performer, duration = null, albumId = null }
   ) {
     const query = {
-      text: `UPDATE songs 
-      SET title = $1, year = $2, genre= $3, performer = $4, duration = $5, "albumId" = $6 
-      WHERE id = $7 RETURNING id`,
+      text: 'UPDATE songs SET title = $1, year = $2, genre= $3, performer = $4, duration = $5, "albumId" = $6 WHERE id = $7 RETURNING id',
       values: [title, year, genre, performer, duration, albumId, id],
     };
 
@@ -77,6 +71,19 @@ class SongsService {
     const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError("gagal dihapus. Id tidak ditemukan");
+    }
+  }
+
+  async verifySong(id) {
+    const query = {
+      text: "SELECT * FROM songs WHERE id = $1",
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError("data tidak ditemukan");
     }
   }
 }

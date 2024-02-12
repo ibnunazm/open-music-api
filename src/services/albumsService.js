@@ -1,8 +1,7 @@
 const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
 const NotFoundError = require("../exceptions/NotFoundError");
-const ClientError = require("../exceptions/ClientError");
-
+const InvariantError = require("../exceptions/InvariantError");
 class AlbumsService {
   constructor() {
     this._pool = new Pool();
@@ -17,7 +16,7 @@ class AlbumsService {
 
     const result = await this._pool.query(query);
     if (!result.rows[0].id) {
-      throw new ClientError("data gagal ditambahkan");
+      throw new InvariantError("data gagal ditambahkan");
     }
 
     return result.rows[0].id;
@@ -28,8 +27,12 @@ class AlbumsService {
       text: `SELECT
       a.id as album_id, a.name as album_name, a.year as album_year,
       s.id as song_id, s.title as song_title, s.performer as song_performer
-      FROM albums a LEFT JOIN songs s ON a.id = s."albumId"
-      WHERE a.id = $1`,
+    FROM
+      albums a
+    LEFT JOIN
+      songs s ON a.id = s."albumId"
+    WHERE
+      a.id = $1`,
       values: [id],
     };
 
