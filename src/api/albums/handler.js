@@ -1,3 +1,4 @@
+const autoBind = require("auto-bind");
 const { mapAlbumSongs } = require("../../utils");
 
 class AlbumsHandler {
@@ -5,10 +6,7 @@ class AlbumsHandler {
     this._service = service;
     this._validator = validator;
 
-    this.addAlbumHandler = this.addAlbumHandler.bind(this);
-    this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
-    this.updateAlbumByIdHandler = this.updateAlbumByIdHandler.bind(this);
-    this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
+    autoBind(this);
   }
 
   async addAlbumHandler(req, h) {
@@ -17,7 +15,7 @@ class AlbumsHandler {
     const id = await this._service.addAlbum(req.payload);
     const response = h.response({
       status: "success",
-      message: "Song berhasil ditambahkan",
+      message: "Album berhasil ditambahkan",
       data: {
         albumId: id,
       },
@@ -30,8 +28,13 @@ class AlbumsHandler {
     const { id } = req.params;
 
     const data = await this._service.getAlbumById(id);
+
     const newDataSongs =
       data[0].song_id !== null ? await data.map(mapAlbumSongs) : [];
+    const coverUrl =
+      data[0].cover !== null
+        ? `http://${process.env.HOST}:${process.env.PORT}/upload/images/${data[0].cover}`
+        : null;
     const response = h.response({
       status: "success",
       data: {
@@ -39,6 +42,7 @@ class AlbumsHandler {
           id: data[0].album_id,
           name: data[0].album_name,
           year: data[0].album_year,
+          coverUrl: coverUrl,
           songs: newDataSongs,
         },
       },
@@ -51,13 +55,12 @@ class AlbumsHandler {
   async updateAlbumByIdHandler(req, h) {
     const { id } = req.params;
     await this._validator.validatePayloadAlbum(req.payload);
-
     await this._service.updateAlbumById(id, req.payload);
+
     const response = h.response({
       status: "success",
       message: "Album berhasil di perbaharui",
     });
-
     response.code(200);
     return response;
   }
